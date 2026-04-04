@@ -43,7 +43,8 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
     client = storage.Client(project=PROJECT_ID)
     df = _read_csv_from_gcs(client, GCS_BUCKET, DATA_KEY)
 
-    required = {"scraped_at", "price", "make", "model", "year", "mileage"}
+    required = {"scraped_at", "price", "make", "model", "year", "mileage", "motor", "title_status", 
+    "transmission", "engine_displacement", "color", "condition"} #EDITED 04.04
     missing = required - set(df.columns)
     if missing:
         raise ValueError(f"Missing required columns: {sorted(missing)}")
@@ -62,6 +63,7 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
     df["price_num"]   = _clean_numeric(df["price"])
     df["year_num"]    = _clean_numeric(df["year"])
     df["mileage_num"] = _clean_numeric(df["mileage"])
+    df["engine_displacement_num"] = _clean_numeric(df["engine_displacement"]) #EDITED 04.04
 
     valid_price_rows = int(df["price_num"].notna().sum())
     logging.info("Rows total=%d | with valid numeric price=%d", orig_rows, valid_price_rows)
@@ -87,8 +89,8 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
 
     # --- Model: make, model, year_num, mileage_num -> price_num ---
     target = "price_num"
-    cat_cols = ["make", "model"]
-    num_cols = ["year_num", "mileage_num"]
+    cat_cols = ["make", "model","title_status","transmission","motor","color","condition"] #EDITED 04.04
+    num_cols = ["year_num", "mileage_num","engine_displacement_num"] #EDITED 04.04
     feats = cat_cols + num_cols
 
     pre = ColumnTransformer(
@@ -115,7 +117,8 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
         X_h = holdout_df[feats]
         y_hat = pipe.predict(X_h)
 
-        cols = ["post_id", "scraped_at", "make", "model", "year", "mileage", "price"]
+        cols = ["post_id", "scraped_at", "make", "model", "year", "mileage", "price", "motor", "title_status", 
+    "transmission", "engine_displacement", "color", "condition"] #EDITED 04.04
         preds_df = holdout_df[cols].copy()
         preds_df["actual_price"] = holdout_df["price_num"]       # cleaned numeric truth
         preds_df["pred_price"]   = np.round(y_hat, 2)
