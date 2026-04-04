@@ -164,13 +164,13 @@ def _vertex_extract_fields(raw_text: str) -> dict:
     schema = {
         "type": "object",
         "properties": {
-            "price": {"type": "integer", "nullable": True},
-            "year": {"type": "integer", "nullable": True},
             "make": {"type": "string", "nullable": True},
             "model": {"type": "string", "nullable": True},
-            "mileage": {"type": "integer", "nullable": True},
+            "engine_displacement": {"type": "integer", "nullable": True},
+            "title_status": {"type": "string", "nullable": True},
+            "color": {"type": "string", "nullable": True}
         },
-        "required": ["price", "year", "make", "model", "mileage"]
+        "required": ["make", "model", "engine_displacement", "title_status", "color"]
     }
 
     # System instruction (will be prepended to the prompt)
@@ -178,7 +178,8 @@ def _vertex_extract_fields(raw_text: str) -> dict:
         "Extract ONLY the following fields from the input text. "
         "Return a strict JSON object that conforms to the provided schema. "
         "If a value is not present, use null. "
-        "Rules: integers for price/year/mileage; price in USD; mileage in miles; "
+        "Rules: integers for engine_displacement; "
+        "title_status must be clean, salvaged, or rebuilt, if not use null."
         "do not infer values not explicitly present; do not add extra keys."
     )
 
@@ -219,9 +220,7 @@ def _vertex_extract_fields(raw_text: str) -> dict:
     parsed = json.loads(resp.text)
 
     # Normalize fields post-extraction
-    parsed["price"] = _safe_int(parsed.get("price"))
-    parsed["year"] = _safe_int(parsed.get("year"))
-    parsed["mileage"] = _safe_int(parsed.get("mileage"))
+    parsed["engine_displacement"] = _safe_int(parsed.get("engine_displacement"))
     
     def _norm_str(s):
         if s is None: return None
@@ -230,6 +229,9 @@ def _vertex_extract_fields(raw_text: str) -> dict:
 
     parsed["make"] = _norm_str(parsed.get("make"))
     parsed["model"] = _norm_str(parsed.get("model"))
+    parsed["title_status"] = _norm_str(parsed.get("title_status"))
+    parsed["color"] = _norm_str(parsed.get("color"))
+    
 
     return parsed
 
@@ -307,17 +309,23 @@ def llm_extract_http(request: Request):
 
             parsed = _vertex_extract_fields(raw_listing)
 
-            # Compose final record
+            # Compose final record #EDITED 04.04
             out_record = {
                 "post_id": post_id,
                 "run_id": base_rec.get("run_id", run_id),
                 "scraped_at": base_rec.get("scraped_at", structured_iso),
                 "source_txt": source_txt_key,
-                "price": parsed.get("price"),
-                "year": parsed.get("year"),
+                "price": base_rec.get("price"),
+                "year": base_rec.get("year"),
+                "motor": base_rec.get("motor"),
+                "transmission": base_rec.get("transmission"),
                 "make": parsed.get("make"),
                 "model": parsed.get("model"),
-                "mileage": parsed.get("mileage"),
+                "mileage": base_rec.get("mileage"),
+                "title_status": parsed.get("title_status"),
+                "engine_displacement": parsed.get("engine_displacement"),
+                "color": parsed.get("color"),
+                "condition": base_rec.get("condition"),
                 "llm_provider": "vertex",
                 "llm_model": LLM_MODEL,
                 "llm_ts": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
