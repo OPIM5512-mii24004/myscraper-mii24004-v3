@@ -38,7 +38,10 @@ storage_client = storage.Client()
 # -------------------- SIMPLE REGEX EXTRACTORS --------------------
 PRICE_RE      = re.compile(r"\$\s?([0-9,]+)")
 YEAR_RE       = re.compile(r"\b(19|20)\d{2}\b")
-MAKE_MODEL_RE = re.compile(r"\b([A-Z][a-z]+)\s+([A-Z][A-Za-z0-9]+)")
+#MAKE_MODEL_RE = re.compile(r"\b([A-Z][a-z]+)\s+([A-Z][A-Za-z0-9]+)") #EDITED 04.04
+TRANS_RE      = re.compile(r"transmission:\s*\n?\s*([A-Za-z ]+)", re.IGNORECASE) #EDITED 04.04
+MOTOR_RE       = re.compile(r"motor:\s*\n?\s*([A-Za-z ]+)", re.IGNORECASE) #EDITED 04.04
+CON_RE       = re.compile(r"condition:\s*\n?\s*([A-Za-z ]+)", re.IGNORECASE) #EDITED 04.04
 
 # -------------------- HELPERS --------------------
 def _list_run_ids(bucket: str, scrapes_prefix: str) -> list[str]:
@@ -125,11 +128,23 @@ def parse_listing(text: str) -> dict:
         except ValueError:
             pass
 
-    mm = MAKE_MODEL_RE.search(text)
-    if mm:
-        d["make"] = mm.group(1)
-        d["model"] = mm.group(2)
+    #mm = MAKE_MODEL_RE.search(text) #EDITED 04.04
+    #if mm:                          #EDITED 04.04
+    #    d["make"] = mm.group(1)     #EDITED 04.04
+    #    d["model"] = mm.group(2)    #EDITED 04.04
 
+    t = TRANS_RE.search(text)
+    if t:
+        d["transmission"] = t.group(1).strip()
+
+    mo = MOTOR_RE.search(text)
+    if f:
+        d["motor"] = f.group(1).strip()
+
+    c = CON_RE.search(text)
+    if f:
+        d["condition"] = f.group(1).strip()
+        
     # mileage variants
     mi = None
     m1 = re.search(r"(?:mileage|odometer)\s*[:\-]?\s*([\d,]+)", text, re.I)
