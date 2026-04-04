@@ -1,6 +1,6 @@
 # main.py
 # Build a single, ever-growing CSV from all structured JSONL files.
-# Reads:  gs://<bucket>/<STRUCTURED_PREFIX>/run_id=*/jsonl/*.jsonl
+# Reads:  gs://<bucket>/<STRUCTURED_PREFIX>/run_id=*/jsonl_llm/*.jsonl
 # Writes: gs://<bucket>/<STRUCTURED_PREFIX>/datasets/listings_master.csv  (atomic publish)
 
 import csv
@@ -24,11 +24,11 @@ storage_client = storage.Client()
 RUN_ID_ISO_RE   = re.compile(r"^\d{8}T\d{6}Z$")  # 20251026T170002Z
 RUN_ID_PLAIN_RE = re.compile(r"^\d{14}$")        # 20251026170002
 
-# Stable CSV schema for students
+# Stable CSV schema for students #EDITED 04.04
 CSV_COLUMNS = [
     "post_id", "run_id", "scraped_at",
-    "price", "year", "make", "model", "mileage",
-    "source_txt"
+    "price", "year", "make", "model", "mileage", "motor", "title_status", 
+    "transmission", "engine_displacement", "color", "condition", ,"llm_model", "llm_provider", "llm_ts", "source_txt"
 ]
 
 def _list_run_ids(bucket: str, structured_prefix: str) -> list[str]:
@@ -47,7 +47,7 @@ def _list_run_ids(bucket: str, structured_prefix: str) -> list[str]:
 def _jsonl_records_for_run(bucket: str, structured_prefix: str, run_id: str):
     """Yield dict records from .jsonl under .../run_id=<run_id>/jsonl/ (one JSON per file)."""
     b = storage_client.bucket(bucket)
-    prefix = f"{structured_prefix}/run_id={run_id}/jsonl/"
+    prefix = f"{structured_prefix}/run_id={run_id}/jsonl_llm/" #EDITED 04.04
     for blob in b.list_blobs(prefix=prefix):
         if not blob.name.endswith(".jsonl"):
             continue
