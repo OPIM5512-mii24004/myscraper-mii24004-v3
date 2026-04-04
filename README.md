@@ -1,2 +1,2 @@
-# craigslist-scraper
-Let's see how good the GCP instructions are!
+# Midterm Project: Craigslist scraper for motorcycle listings in NY
+EDIT BEFORE SUBMISSION!!!!
