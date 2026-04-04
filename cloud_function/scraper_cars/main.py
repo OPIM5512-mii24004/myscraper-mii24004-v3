@@ -8,8 +8,8 @@ from flask import Request, jsonify
 
 # ---- Config (overridable via env vars in deploy.yml) ----
 BUCKET_NAME        = os.environ["BUCKET_NAME"]
-BASE_SITE          = os.environ.get("BASE_SITE", "https://newhaven.craigslist.org")
-SEARCH_PATH        = os.environ.get("SEARCH_PATH", "/search/cta")   # cars+trucks
+BASE_SITE          = os.environ.get("BASE_SITE", "https://newyork.craigslist.org") #EDITED 04.04
+SEARCH_PATH        = os.environ.get("SEARCH_PATH", "/search/mca")   # motorcycles #EDITED 04.04
 MAX_PAGES          = int(os.environ.get("MAX_PAGES", "1"))          # search pages to scan
 MAX_ITEMS_PER_RUN  = int(os.environ.get("MAX_ITEMS_PER_RUN", "50")) # safety cap per run
 DELAY_SECS         = float(os.environ.get("DELAY_SECS", "1.0"))     # polite delay between requests
