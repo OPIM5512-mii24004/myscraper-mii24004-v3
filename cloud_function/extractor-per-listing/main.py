@@ -138,11 +138,11 @@ def parse_listing(text: str) -> dict:
         d["transmission"] = t.group(1).strip()
 
     mo = MOTOR_RE.search(text)
-    if f:
+    if mo:
         d["motor"] = mo.group(1).strip()
 
     c = CON_RE.search(text)
-    if f:
+    if c:
         d["condition"] = c.group(1).strip()
         
     # mileage variants
