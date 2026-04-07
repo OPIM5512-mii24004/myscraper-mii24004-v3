@@ -92,6 +92,7 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
 
     
     train_df = train_df[train_df["price_num"].notna()]
+    holdout_df = holdout_df[holdout_df["price_num"].notna()]
     
     if len(train_df) < 40:
         return {"status": "noop", "reason": "too few training rows", "train_rows": int(len(train_df))}
@@ -145,7 +146,7 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
         # ---- Perform permutation importance
         perm_imp = permutation_importance(pipe, X_h, y_true, n_repeats=20,
                                     random_state=42)
-        perm_df = pd.DataFrame({"Features": features, "Importance": perm_imp.importances_mean}).sort_values(by="Importance", ascending=False)
+        perm_df = pd.DataFrame({"Features": feats, "Importance": perm_imp.importances_mean}).sort_values(by="Importance", ascending=False)
         
     # --- Output path: HOURLY folder structure ---
     now_utc = pd.Timestamp.utcnow().tz_convert("UTC")
