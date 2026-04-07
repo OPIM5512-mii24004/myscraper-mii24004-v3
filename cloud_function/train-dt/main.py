@@ -114,11 +114,12 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
 
     model = DecisionTreeRegressor(max_depth=max_depth, min_samples_leaf=min_samples_leaf, random_state=42)
     pipe = Pipeline([("pre", pre), ("model", model)])
-    features = pipe.named_steps['pre'].get_feature_names_out()
 
     X_train = train_df[feats]
     y_train = train_df[target]
     pipe.fit(X_train, y_train)
+
+    features = pipe.named_steps['pre'].get_feature_names_out()
 
     # ---- Predict/evaluate on today's holdout (now includes actual price fields) ----
     mae_today = None
