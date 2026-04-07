@@ -11,6 +11,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.metrics import mean_absolute_error
+from sklearn.inspection import permutation_importance
 
 # ---- ENV ----
 PROJECT_ID     = os.getenv("PROJECT_ID", "")
@@ -44,7 +45,7 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
     df = _read_csv_from_gcs(client, GCS_BUCKET, DATA_KEY)
 
     required = {"scraped_at", "price", "make", "model", "year", "mileage", "motor", "title_status", 
-    "transmission", "engine_displacement", "color", "condition"} #EDITED 04.04
+    "transmission", "engine_displacement", "color", "condition"} 
     missing = required - set(df.columns)
     if missing:
         raise ValueError(f"Missing required columns: {sorted(missing)}")
@@ -89,8 +90,8 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
 
     # --- Model: make, model, year_num, mileage_num -> price_num ---
     target = "price_num"
-    cat_cols = ["make", "model","title_status","transmission","motor","color","condition"] #EDITED 04.04
-    num_cols = ["year_num", "mileage_num","engine_displacement_num"] #EDITED 04.04
+    cat_cols = ["make", "model","title_status","transmission","motor","color","condition"] 
+    num_cols = ["year_num", "mileage_num","engine_displacement_num"] 
     feats = cat_cols + num_cols
 
     pre = ColumnTransformer(
@@ -105,6 +106,7 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
 
     model = DecisionTreeRegressor(max_depth=max_depth, min_samples_leaf=min_samples_leaf, random_state=42)
     pipe = Pipeline([("pre", pre), ("model", model)])
+    features = pipe.named_steps['pre'].get_feature_names_out()
 
     X_train = train_df[feats]
     y_train = train_df[target]
@@ -115,30 +117,43 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
     preds_df = pd.DataFrame()
     if not holdout_df.empty:
         X_h = holdout_df[feats]
+        y_true = holdout_df["price_num"]
+        
         y_hat = pipe.predict(X_h)
 
         cols = ["post_id", "scraped_at", "make", "model", "year", "mileage", "price", "motor", "title_status", 
-    "transmission", "engine_displacement", "color", "condition"] #EDITED 04.04
+    "transmission", "engine_displacement", "color", "condition"] 
         preds_df = holdout_df[cols].copy()
         preds_df["actual_price"] = holdout_df["price_num"]       # cleaned numeric truth
         preds_df["pred_price"]   = np.round(y_hat, 2)
 
         if holdout_df["price_num"].notna().any():
-            y_true = holdout_df["price_num"]
             mask = y_true.notna()
             if mask.any():
                 mae_today = float(mean_absolute_error(y_true[mask], y_hat[mask]))
-
+            preds_df['mae_today'] = mae_today
+            
+    # ---- Perform permutation importance
+    perm_imp = permutation_importance(pipe, X_h, y_true, n_repeats=20,
+                                random_state=42)
+    perm_sorted_idx = perm_imp.importances_mean.argsort()
+    
+    perm_df = pd.DataFrame({"Features": features, "Importance": perm_imp.importances_mean}).sort_values(by="Importance", ascending=False)})
+    
     # --- Output path: HOURLY folder structure ---
     now_utc = pd.Timestamp.utcnow().tz_convert("UTC")
-    out_key = f"{OUTPUT_PREFIX}/{now_utc.strftime('%Y%m%d%H')}/preds.csv"
-
+    out_key_pred = f"{OUTPUT_PREFIX}/{now_utc.strftime('%Y%m%d%H')}/preds.csv"
+    out_key_perm = f"{OUTPUT_PREFIX}/{now_utc.strftime('%Y%m%d%H')}/perm.csv"
+    
     if not dry_run and len(preds_df) > 0:
-        _write_csv_to_gcs(client, GCS_BUCKET, out_key, preds_df)
-        logging.info("Wrote predictions to gs://%s/%s (%d rows)", GCS_BUCKET, out_key, len(preds_df))
+        _write_csv_to_gcs(client, GCS_BUCKET, out_key_pred, preds_df)
+        logging.info("Wrote predictions to gs://%s/%s (%d rows)", GCS_BUCKET, out_key_pred, len(preds_df))
+        
+        _write_csv_to_gcs(client, GCS_BUCKET, out_key_perm, perm_df)
+        logging.info("Wrote predictions to gs://%s/%s (%d rows)", GCS_BUCKET, out_key_perm, len(perm_df))
     else:
-        logging.info("Dry run or no holdout rows; skip write. Would write to gs://%s/%s", GCS_BUCKET, out_key)
-
+        logging.info("Dry run or no holdout rows; skip write. Would write to gs://%s/%s", GCS_BUCKET, out_key_pred, out_key_perm)
+        
     return {
         "status": "ok",
         "today_local": str(today_local),
@@ -146,7 +161,8 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
         "holdout_rows": int(len(holdout_df)),
         "valid_price_rows": valid_price_rows,
         "mae_today": mae_today,
-        "output_key": out_key,
+        "output_key_perm": out_key_perm,
+        "output_key_pred": out_key_pred,
         "dry_run": dry_run,
         "timezone": TIMEZONE,
     }
