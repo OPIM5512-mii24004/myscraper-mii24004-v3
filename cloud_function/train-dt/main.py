@@ -72,9 +72,9 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
     counts = df["date_local"].value_counts().sort_index()
     logging.info("Recent date counts (local): %s", json.dumps({str(k): int(v) for k, v in counts.tail(8).items()}))
 
-    unique_dates = sorted(d for d in df["date_local"].dropna().unique())
-    if len(unique_dates) < 2:
-        return {"status": "noop", "reason": "need at least two distinct dates", "dates": [str(d) for d in unique_dates]}
+    #unique_dates = sorted(d for d in df["date_local"].dropna().unique())
+    #if len(unique_dates) < 2:
+    #    return {"status": "noop", "reason": "need at least two distinct dates", "dates": [str(d) for d in unique_dates]}
 
     today_local = unique_dates[-1]
     #train_df   = df[df["date_local"] <  today_local].copy()
