@@ -81,7 +81,7 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
     #holdout_df = df[df["date_local"] == today_local].copy()
 
     train_df = df.sample(frac=0.8, random_state=42)
-    holdout_df = df.drop(train_data.index)
+    holdout_df = df.drop(train_df.index)
 
     train_df = train_df[train_df["price_num"].notna()]
     #dropped_for_target = int((df["date_local"] < today_local).sum()) - int(len(train_df))
