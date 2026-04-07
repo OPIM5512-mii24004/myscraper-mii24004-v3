@@ -164,7 +164,7 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
         
     return {
         "status": "ok",
-        "today_local": str(today_local),
+        #"today_local": str(today_local),
         "train_rows": int(len(train_df)),
         "holdout_rows": int(len(holdout_df)),
         "valid_price_rows": valid_price_rows,
