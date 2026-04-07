@@ -90,7 +90,7 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
 
     # --- Model: make, model, year_num, mileage_num -> price_num ---
     target = "price_num"
-    cat_cols = ["make", "model","title_status","transmission","motor","color","condition"] 
+    cat_cols = ["make", "model","title_status","transmission","motor","condition"] 
     num_cols = ["year_num", "mileage_num","engine_displacement_num"] 
     feats = cat_cols + num_cols
 
