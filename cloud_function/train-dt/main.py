@@ -84,7 +84,7 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
     holdout_df = df.drop(train_df.index)
 
     if holdout_df.empty:
-    raise ValueError("Holdout set is empty — check dataset size or split logic")
+        raise ValueError("Holdout set is empty — check dataset size or split logic")
     
     #dropped_for_target = int((df["date_local"] < today_local).sum()) - int(len(train_df))
     #logging.info("Train rows after target clean: %d (dropped_for_target=%d)", len(train_df), dropped_for_target)
