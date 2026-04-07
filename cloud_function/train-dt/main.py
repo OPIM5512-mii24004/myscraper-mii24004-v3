@@ -138,7 +138,7 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
                                 random_state=42)
     perm_sorted_idx = perm_imp.importances_mean.argsort()
     
-    perm_df = pd.DataFrame({"Features": features, "Importance": perm_imp.importances_mean}).sort_values(by="Importance", ascending=False)})
+    perm_df = pd.DataFrame({"Features": features, "Importance": perm_imp.importances_mean}).sort_values(by="Importance", ascending=False)
     
     # --- Output path: HOURLY folder structure ---
     now_utc = pd.Timestamp.utcnow().tz_convert("UTC")
