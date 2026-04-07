@@ -51,8 +51,8 @@ jobs:
           LATEST_RUN_DIR=$(gsutil ls -d gs://${BUCKET_NAME}/${GCS_PREDS_PREFIX}/*/ | tail -1)
           
           # 2b. Extract the timestamp (folder name, e.g., 2025120816)
-          #LATEST_RUN_ID=$(echo "$LATEST_RUN_DIR" | sed -E "s|gs://${BUCKET_NAME}/${GCS_PREDS_PREFIX}/||; s|/||")
-          LATEST_RUN_ID=2026040707
+          LATEST_RUN_ID=$(echo "$LATEST_RUN_DIR" | sed -E "s|gs://${BUCKET_NAME}/${GCS_PREDS_PREFIX}/||; s|/||")
+          #LATEST_RUN_ID=2026040707
           # 2c. Define file paths and save variables to GITHUB_OUTPUT
           LOCAL_FILENAME="$LATEST_RUN_ID-perm.csv"
           GCS_SOURCE_FILE="${{ env.GCS_PREDS_PREFIX }}/$LATEST_RUN_ID/perm.csv"
