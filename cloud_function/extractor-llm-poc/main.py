@@ -168,9 +168,8 @@ def _vertex_extract_fields(raw_text: str) -> dict:
             "model": {"type": "string", "nullable": True},
             "engine_displacement": {"type": "integer", "nullable": True},
             "title_status": {"type": "string", "nullable": True},
-            "color": {"type": "string", "nullable": True}
         },
-        "required": ["make", "model", "engine_displacement", "title_status", "color"]
+        "required": ["make", "model", "engine_displacement", "title_status"]
     }
 
     # System instruction (will be prepended to the prompt)
@@ -230,8 +229,6 @@ def _vertex_extract_fields(raw_text: str) -> dict:
     parsed["make"] = _norm_str(parsed.get("make"))
     parsed["model"] = _norm_str(parsed.get("model"))
     parsed["title_status"] = _norm_str(parsed.get("title_status"))
-    parsed["color"] = _norm_str(parsed.get("color"))
-    
 
     return parsed
 
@@ -324,7 +321,6 @@ def llm_extract_http(request: Request):
                 "mileage": base_rec.get("mileage"),
                 "title_status": parsed.get("title_status"),
                 "engine_displacement": parsed.get("engine_displacement"),
-                "color": parsed.get("color"),
                 "condition": base_rec.get("condition"),
                 "llm_provider": "vertex",
                 "llm_model": LLM_MODEL,
