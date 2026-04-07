@@ -64,7 +64,7 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
     df["price_num"]   = _clean_numeric(df["price"])
     df["year_num"]    = _clean_numeric(df["year"])
     df["mileage_num"] = _clean_numeric(df["mileage"])
-    df["engine_displacement_num"] = _clean_numeric(df["engine_displacement"]) #EDITED 04.04
+    df["engine_displacement_num"] = _clean_numeric(df["engine_displacement"])
 
     valid_price_rows = int(df["price_num"].notna().sum())
     logging.info("Rows total=%d | with valid numeric price=%d", orig_rows, valid_price_rows)
@@ -77,13 +77,16 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
         return {"status": "noop", "reason": "need at least two distinct dates", "dates": [str(d) for d in unique_dates]}
 
     today_local = unique_dates[-1]
-    train_df   = df[df["date_local"] <  today_local].copy()
-    holdout_df = df[df["date_local"] == today_local].copy()
+    #train_df   = df[df["date_local"] <  today_local].copy()
+    #holdout_df = df[df["date_local"] == today_local].copy()
+
+    train_df = df.sample(frac=0.8, random_state=42)
+    holdout_df = df.drop(train_data.index)
 
     train_df = train_df[train_df["price_num"].notna()]
-    dropped_for_target = int((df["date_local"] < today_local).sum()) - int(len(train_df))
-    logging.info("Train rows after target clean: %d (dropped_for_target=%d)", len(train_df), dropped_for_target)
-    logging.info("Holdout rows today (%s): %d", today_local, len(holdout_df))
+    #dropped_for_target = int((df["date_local"] < today_local).sum()) - int(len(train_df))
+    #logging.info("Train rows after target clean: %d (dropped_for_target=%d)", len(train_df), dropped_for_target)
+    #logging.info("Holdout rows today (%s): %d", today_local, len(holdout_df))
 
     if len(train_df) < 40:
         return {"status": "noop", "reason": "too few training rows", "train_rows": int(len(train_df))}
