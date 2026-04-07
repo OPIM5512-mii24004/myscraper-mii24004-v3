@@ -133,13 +133,13 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
                 mae_today = float(mean_absolute_error(y_true[mask], y_hat[mask]))
             preds_df['mae_today'] = mae_today
             
-    # ---- Perform permutation importance
-    perm_imp = permutation_importance(pipe, X_h, y_true, n_repeats=20,
-                                random_state=42)
-    perm_sorted_idx = perm_imp.importances_mean.argsort()
-    
-    perm_df = pd.DataFrame({"Features": features, "Importance": perm_imp.importances_mean}).sort_values(by="Importance", ascending=False)
-    
+        # ---- Perform permutation importance
+        perm_imp = permutation_importance(pipe, X_h, y_true, n_repeats=20,
+                                    random_state=42)
+        perm_sorted_idx = perm_imp.importances_mean.argsort()
+        
+        perm_df = pd.DataFrame({"Features": features, "Importance": perm_imp.importances_mean}).sort_values(by="Importance", ascending=False)
+        
     # --- Output path: HOURLY folder structure ---
     now_utc = pd.Timestamp.utcnow().tz_convert("UTC")
     out_key_pred = f"{OUTPUT_PREFIX}/{now_utc.strftime('%Y%m%d%H')}/preds.csv"
