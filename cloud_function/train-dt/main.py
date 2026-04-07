@@ -45,7 +45,7 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
     df = _read_csv_from_gcs(client, GCS_BUCKET, DATA_KEY)
 
     required = {"scraped_at", "price", "make", "model", "year", "mileage", "motor", "title_status", 
-    "transmission", "engine_displacement", "color", "condition"} 
+    "transmission", "engine_displacement", "condition"} 
     missing = required - set(df.columns)
     if missing:
         raise ValueError(f"Missing required columns: {sorted(missing)}")
@@ -125,7 +125,7 @@ def run_once(dry_run: bool = False, max_depth: int = 12, min_samples_leaf: int =
         y_hat = pipe.predict(X_h)
 
         cols = ["post_id", "scraped_at", "make", "model", "year", "mileage", "price", "motor", "title_status", 
-    "transmission", "engine_displacement", "color", "condition"] 
+    "transmission", "engine_displacement", "condition"] 
         preds_df = holdout_df[cols].copy()
         preds_df["actual_price"] = holdout_df["price_num"]       # cleaned numeric truth
         preds_df["pred_price"]   = np.round(y_hat, 2)
