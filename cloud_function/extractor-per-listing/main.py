@@ -37,8 +37,7 @@ storage_client = storage.Client()
 
 # -------------------- SIMPLE REGEX EXTRACTORS --------------------
 PRICE_RE      = re.compile(r"\$\s?([0-9,]+)")
-YEAR_RE       = re.compile(r"\b(19|20)\d{2}\b")
-#MAKE_MODEL_RE = re.compile(r"\b([A-Z][a-z]+)\s+([A-Z][A-Za-z0-9]+)") 
+YEAR_RE       = re.compile(r"\b(19|20)\d{2}\b") 
 TRANS_RE      = re.compile(r"transmission:\s*\n?\s*([A-Za-z ]+)", re.IGNORECASE) 
 MOTOR_RE       = re.compile(r"motor:\s*\n?\s*([A-Za-z ]+)", re.IGNORECASE) 
 CON_RE       = re.compile(r"condition:\s*\n?\s*([A-Za-z ]+)", re.IGNORECASE) 
