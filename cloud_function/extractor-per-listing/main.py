@@ -38,10 +38,10 @@ storage_client = storage.Client()
 # -------------------- SIMPLE REGEX EXTRACTORS --------------------
 PRICE_RE      = re.compile(r"\$\s?([0-9,]+)")
 YEAR_RE       = re.compile(r"\b(19|20)\d{2}\b")
-#MAKE_MODEL_RE = re.compile(r"\b([A-Z][a-z]+)\s+([A-Z][A-Za-z0-9]+)") #EDITED 04.04
-TRANS_RE      = re.compile(r"transmission:\s*\n?\s*([A-Za-z ]+)", re.IGNORECASE) #EDITED 04.04
-MOTOR_RE       = re.compile(r"motor:\s*\n?\s*([A-Za-z ]+)", re.IGNORECASE) #EDITED 04.04
-CON_RE       = re.compile(r"condition:\s*\n?\s*([A-Za-z ]+)", re.IGNORECASE) #EDITED 04.04
+#MAKE_MODEL_RE = re.compile(r"\b([A-Z][a-z]+)\s+([A-Z][A-Za-z0-9]+)") 
+TRANS_RE      = re.compile(r"transmission:\s*\n?\s*([A-Za-z ]+)", re.IGNORECASE) 
+MOTOR_RE       = re.compile(r"motor:\s*\n?\s*([A-Za-z ]+)", re.IGNORECASE) 
+CON_RE       = re.compile(r"condition:\s*\n?\s*([A-Za-z ]+)", re.IGNORECASE) 
 
 # -------------------- HELPERS --------------------
 def _list_run_ids(bucket: str, scrapes_prefix: str) -> list[str]:
@@ -127,12 +127,7 @@ def parse_listing(text: str) -> dict:
             d["year"] = int(y.group(0))
         except ValueError:
             pass
-
-    #mm = MAKE_MODEL_RE.search(text) #EDITED 04.04
-    #if mm:                          #EDITED 04.04
-    #    d["make"] = mm.group(1)     #EDITED 04.04
-    #    d["model"] = mm.group(2)    #EDITED 04.04
-
+            
     t = TRANS_RE.search(text)
     if t:
         d["transmission"] = t.group(1).strip()
