@@ -1,0 +1,10 @@
+Features,Importance
+mileage_num,0.5773464413240784
+engine_displacement_num,0.05218648621559048
+motor,0.00791556289951036
+year_num,0.003631208764444449
+condition,0.00040126290739101453
+make,0.0
+model,0.0
+title_status,0.0
+transmission,-7.681547673212275e-05
